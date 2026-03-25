@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Users" ALTER COLUMN "active" SET DEFAULT true,
+ALTER COLUMN "deletedBy" DROP NOT NULL,
+ALTER COLUMN "updatedBy" DROP NOT NULL;
