@@ -10,6 +10,8 @@ export class AuthenticationController {
         const user = await this.authenticationService.validateUser(dto);
         return {
             message: 'Login successful',
+            status:true,
+            message: 'Login successful',    
             user,
         };
     }
