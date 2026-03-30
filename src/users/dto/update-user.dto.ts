@@ -6,7 +6,14 @@ export class UpdateUserDto {
     @MaxLength(100)
     @IsOptional()
     @IsEmail()
-    nombre?: string;
+    email?: string;
+
+
+    @IsString()
+    @MinLength(3)
+    @MaxLength(100)
+    @IsOptional()
+    name?: string;
 
     @IsString()
     @MinLength(12)

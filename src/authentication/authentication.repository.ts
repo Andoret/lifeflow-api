@@ -18,6 +18,7 @@ export class AuthenticationRepository {
                 roleId: true,
                 active: true,
                 password: true,
+                name: true,
             }
         });
         if (!user) {

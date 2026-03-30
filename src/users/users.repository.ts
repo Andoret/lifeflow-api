@@ -1,6 +1,9 @@
-
-import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -8,6 +11,7 @@ export class UsersRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(data: {
+    name: string;
     email: string;
     password: string;
     roleId: number;
@@ -16,8 +20,8 @@ export class UsersRepository {
     updatedBy?: number | null;
   }) {
     try {
-    const user = await this.prisma.users.create({ data });
-    return user.userId;
+      const user = await this.prisma.users.create({ data });
+      return user.userId;
     } catch (error) {
       console.error(error);
       if (
@@ -30,24 +34,55 @@ export class UsersRepository {
     }
   }
 
-  async update(id:number,data: {
-    email?: string;
-    password?: string;
-    roleId?: number;
+  async createAutoRegister(data: {
+    name: string;
+    email: string;
+    password: string;
   }) {
     try {
-      const user = await this.prisma.users.update(
-        { where: { userId: id }, data});
+      const user = await this.prisma.users.create({
+        data: {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          roleId: 2,
+          active: true,
+          deletedBy: null,
+          updatedBy: null,
+        },
+      });
       return user.userId;
-    }catch(error){
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException(
+        'Failed to create auto register user',
+      );
+    }
+  }
+
+  async update(
+    id: number,
+    data: {
+      email?: string;
+      name?: string;
+      password?: string;
+      roleId?: number;
+    },
+  ) {
+    try {
+      const user = await this.prisma.users.update({
+        where: { userId: id },
+        data,
+      });
+      return user.userId;
+    } catch (error) {
       console.error(error);
       throw new InternalServerErrorException('Failed to update user');
     }
   }
 
-
-  async delete (id:number) {
-    try{
+  async delete(id: number) {
+    try {
       const user = await this.prisma.users.delete({
         where: { userId: id },
         select: {
@@ -55,7 +90,7 @@ export class UsersRepository {
         },
       });
       return user.userId;
-    }catch(error){
+    } catch (error) {
       console.error(error);
       throw new InternalServerErrorException('Failed to delete user');
     }
@@ -86,10 +121,12 @@ export class UsersRepository {
       });
     } catch (error) {
       console.error(error);
-      throw new InternalServerErrorException('Failed to find user by id with password');
+      throw new InternalServerErrorException(
+        'Failed to find user by id with password',
+      );
     }
   }
-  
+
   async findById(id: number) {
     try {
       return this.prisma.users.findUnique({
@@ -97,6 +134,7 @@ export class UsersRepository {
         select: {
           userId: true,
           email: true,
+          name: true,
           roleId: true,
         },
       });
@@ -106,8 +144,8 @@ export class UsersRepository {
     }
   }
 
-  async changePassword(id:number,password:string){
-    try{
+  async changePassword(id: number, password: string) {
+    try {
       const user = await this.prisma.users.update({
         where: { userId: id },
         data: { password: password },
@@ -116,8 +154,7 @@ export class UsersRepository {
         },
       });
       return user.userId;
-    }
-    catch(error){
+    } catch (error) {
       console.error(error);
       throw new InternalServerErrorException('Failed to change password');
     }
