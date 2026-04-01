@@ -7,12 +7,21 @@ export class AuthenticationController {
 
     @Post('login')
     async login(@Body() dto: LoginDto) {
-        const user = await this.authenticationService.validateUser(dto);
+        const data = await this.authenticationService.login(dto);
         return {
-            message: 'Login successful',
             status:true,
             message: 'Login successful',    
-            user,
+            ...data,
+        };
+    }
+
+    @Post('refresh-token')
+    async refreshToken(@Body() body) {
+        const data = await this.authenticationService.refreshToken(body.refresh_token);
+        return {
+            status:true,
+            message: 'Refresh token successful',
+            ...data,
         };
     }
 }
