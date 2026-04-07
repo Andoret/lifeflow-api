@@ -16,6 +16,7 @@ export class AuthenticationService {
       userId: user.userId,
       email: user.email,
       role: user.roleId,
+      name: user.name,
     };
     return {
       user: payload,
