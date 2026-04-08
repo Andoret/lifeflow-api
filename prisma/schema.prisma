@@ -24,6 +24,7 @@ model Roles{
 model Users{
   userId Int @id @default(autoincrement())
   email String @unique
+  name String
   roleId Int 
   password String
   lastLogin DateTime?

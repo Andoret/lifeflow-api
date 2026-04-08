@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, AutoRegisterDto } from './dto/create-user.dto';
 import { ChangePasswordDto, UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './users.repository';
 import * as bcrypt from 'bcrypt';
@@ -16,6 +16,20 @@ export class UsersService {
     }
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.usersRepository.create({...dto, password: hashedPassword, active: true, deletedBy: null, updatedBy: null});
+    return {
+      id: user,
+    };
+  }
+  async createAutoRegister(dto: AutoRegisterDto){
+    const existingUser = await this.usersRepository.findByEmail(dto.email);
+    if (existingUser) {
+      throw new ConflictException('User already exists');
+    }
+    if (dto.password !== dto.confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const user = await this.usersRepository.createAutoRegister({...dto,password:hashedPassword});
     return {
       id: user,
     };
