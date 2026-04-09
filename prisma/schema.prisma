@@ -36,6 +36,7 @@ model Users{
   expenses  Expenses[]
   categories Categories[]
   speeches   ExpensesToSpeech[]
+  exCatUser exCatUser[]
 }
 
 model Categories {
@@ -67,5 +68,24 @@ model ExpensesToSpeech{
   requestId String
   date DateTime @default(now())
 
+  user        Users    @relation(fields: [userId], references: [userId])
+}
+
+
+model ExcerciseCategories{
+  exCatId Int @id @default(autoincrement())
+  catname String
+
+  exCatUsers exCatUser[]
+}
+
+
+model exCatUser{
+  exCatUId Int @id @default(autoincrement())
+  exCatId  Int
+  userId Int
+  reqResponse String
+  dateUsing DateTime @default(now()) 
+  exCat       ExcerciseCategories    @relation(fields: [exCatId], references: [exCatId])
   user        Users    @relation(fields: [userId], references: [userId])
 }
