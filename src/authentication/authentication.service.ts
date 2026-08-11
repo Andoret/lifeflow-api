@@ -20,20 +20,8 @@ export class AuthenticationService {
     };
     return {
       user: payload,
-      refresh_token: this.jwtService.sign(
-        {
-          payload
-        },
-        { expiresIn: '7d' }
-        
-      ),
-      access_token: this.jwtService.sign(
-        {
-          payload,
-        },
-        { expiresIn: '15m' }
-        
-      ),
+      refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      access_token: this.jwtService.sign(payload, { expiresIn: '15m' }),
     };
   }
 
@@ -47,16 +35,16 @@ export class AuthenticationService {
   }
 
   async refreshToken(refresh_token: string) {
-    try{
-    const payload = await this.jwtService.verify(refresh_token);
-    return {
-      access_token: this.jwtService.sign({
-        userId: payload.userId,
-        email: payload.email,
-          role: payload.role,
-        }, { expiresIn: '15m' }),
+    try {
+      const payload = await this.jwtService.verify(refresh_token);
+      const { userId, email, role, name } = payload;
+      return {
+        access_token: this.jwtService.sign(
+          { userId, email, role, name },
+          { expiresIn: '15m' },
+        ),
       };
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }

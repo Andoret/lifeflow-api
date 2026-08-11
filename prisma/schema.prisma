@@ -1,91 +1,281 @@
 // This is your Prisma schema file,
+
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
+
+
 generator client {
+
   provider = "prisma-client-js"
+
 }
 
+
+
 datasource db {
+
   provider = "postgresql"
+
   url       = env("DATABASE_URL_POOLING")
+
   directUrl = env("DIRECT_URL")
+
 }
+
+
+
 
 
 model Roles{
+
   roleId Int @id @default(autoincrement())  
+
   description String
+
+
 
   users       Users[]
+
 }
+
+
 
 model Users{
+
   userId Int @id @default(autoincrement())
+
   email String @unique
+
   name String
+
   roleId Int 
+
   password String
+
   lastLogin DateTime?
+
   active Boolean @default(true)
+
   deletedBy Int?
+
   updatedBy Int?
 
+
+
   role      Roles    @relation(fields: [roleId], references: [roleId])
+
   expenses  Expenses[]
+
   categories Categories[]
+
   speeches   ExpensesToSpeech[]
-  exCatUser exCatUser[]
+
+  exerciseWeekDays ExerciseWeekDay[]
+
+  scheduleActivities ScheduleActivities[]
+
+  excerciseCategories ExcerciseCategories[]
+
+  kitchenRequests KitchenRequests[]
+
 }
+
+
 
 model Categories {
+
   categoryId Int    @id @default(autoincrement())
+
   userId     Int
+
   name       String
 
+
+
   user     Users     @relation(fields: [userId], references: [userId])
+
   expenses Expenses[]
+
   @@unique([userId, name])
+
 }
+
+
 
 model Expenses{
+
   expenseId Int @id @default(autoincrement())
+
   userId Int 
+
   categoryId  Int
+
   description String
+
   price Float
+
   date DateTime @default(now())
+
+
 
   user      Users    @relation(fields: [userId], references: [userId])
+
   category  Categories @relation(fields: [categoryId], references: [categoryId])
 
+
+
 }
+
+
 
 model ExpensesToSpeech{
+
   expenseTsId Int @id @default(autoincrement())
+
   userId Int
+
   requestId String
+
   date DateTime @default(now())
 
+
+
   user        Users    @relation(fields: [userId], references: [userId])
+
 }
 
+
+
+
+
+/// Catálogo personal del usuario: Pecho, Pierna, Box, Estiramiento, etc.
 
 model ExcerciseCategories{
+
   exCatId Int @id @default(autoincrement())
+
+  userId  Int
+
   catname String
 
-  exCatUsers exCatUser[]
+
+
+  user            Users             @relation(fields: [userId], references: [userId])
+
+  exerciseWeekDays ExerciseWeekDay[]
+
+
+
+  @@unique([userId, catname])
+
 }
 
 
-model exCatUser{
-  exCatUId Int @id @default(autoincrement())
-  exCatId  Int
-  userId Int
-  reqResponse String
-  dateUsing DateTime @default(now()) 
-  exCat       ExcerciseCategories    @relation(fields: [exCatId], references: [exCatId])
-  user        Users    @relation(fields: [userId], references: [userId])
+
+/// Plan semanal: qué categoría hace cada día (lun=pecho, mar=pierna, ...)
+
+model ExerciseWeekDay {
+
+  weekDayId   Int      @id @default(autoincrement())
+
+  userId      Int
+
+  weekStart   DateTime @db.Date
+
+  dayOfWeek   Int      /// 1=Lunes ... 7=Domingo (ISO)
+
+  exCatId     Int?
+
+  reqResponse String?
+
+  dateUsing   DateTime @default(now())
+
+  updatedAt   DateTime @updatedAt
+
+
+
+  timeLimitMinutes Int?
+
+
+
+  user  Users               @relation(fields: [userId], references: [userId])
+
+  exCat ExcerciseCategories? @relation(fields: [exCatId], references: [exCatId])
+
+
+
+  @@unique([userId, weekStart, dayOfWeek])
+
+  @@index([userId, weekStart])
+
 }
+
+
+
+model ScheduleActivities {
+
+  scheduleActivityId Int      @id @default(autoincrement())
+
+  userId             Int
+
+  title              String
+
+  description        String?
+
+  activityDate       DateTime @db.Date
+
+  hour               Int
+
+  category           String   @default("GENERAL")
+
+  priority           Int      @default(2) /// 1=Baja, 2=Media, 3=Alta
+
+  completed          Boolean  @default(false)
+
+  createdAt          DateTime @default(now())
+
+  updatedAt          DateTime @updatedAt
+
+
+
+  user Users @relation(fields: [userId], references: [userId])
+
+
+
+  @@index([userId, activityDate])
+
+}
+
+
+
+/// Solicitudes de sugerencia de platillo a partir de ingredientes (espacio preparado para IA)
+
+model KitchenRequests {
+
+  kitchenRequestId Int      @id @default(autoincrement())
+
+  userId           Int
+
+  ingredients      String[]
+
+  reqResponse      String?
+
+  createdAt        DateTime @default(now())
+
+  updatedAt        DateTime @updatedAt
+
+
+
+  user Users @relation(fields: [userId], references: [userId])
+
+
+
+  @@index([userId, createdAt])
+
+}
+
+
