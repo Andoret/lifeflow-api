@@ -9,32 +9,30 @@ export class ExcerciseCategoriesService {
     private readonly excerciseCategoriesRepository: ExcerciseCategoriesRepository,
   ) {}
 
-  async create(dto: CreateExcerciseCategoryDto) {
-    const id = await this.excerciseCategoriesRepository.create({
+  async create(userId: number, dto: CreateExcerciseCategoryDto) {
+    return this.excerciseCategoriesRepository.create({
+      userId,
       catname: dto.catname,
     });
-    return { id };
   }
 
-  async findAll() {
-    return this.excerciseCategoriesRepository.findAll();
+  async findByUserId(userId: number) {
+    return this.excerciseCategoriesRepository.findByUserId(userId);
   }
 
-  async findById(id: number) {
-    return this.excerciseCategoriesRepository.findById(id);
+  async findById(id: number, userId: number) {
+    return this.excerciseCategoriesRepository.findByIdAndUser(id, userId);
   }
 
-  async update(id: number, dto: UpdateExcerciseCategoryDto) {
-    await this.excerciseCategoriesRepository.findById(id);
-    const category = await this.excerciseCategoriesRepository.update(id, {
+  async update(id: number, userId: number, dto: UpdateExcerciseCategoryDto) {
+    const category = await this.excerciseCategoriesRepository.update(id, userId, {
       catname: dto.catname,
     });
     return { id: category.exCatId };
   }
 
-  async delete(id: number) {
-    await this.excerciseCategoriesRepository.findById(id);
-    const category = await this.excerciseCategoriesRepository.delete(id);
+  async delete(id: number, userId: number) {
+    const category = await this.excerciseCategoriesRepository.delete(id, userId);
     return { id: category.exCatId };
   }
 }

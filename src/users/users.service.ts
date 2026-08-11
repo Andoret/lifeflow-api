@@ -40,8 +40,13 @@ export class UsersService {
     if (!existingUser) {
       throw new NotFoundException('User not found');
     }
-    
-    const user = await this.usersRepository.update(id,dto);
+
+    const data = { ...dto };
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+
+    const user = await this.usersRepository.update(id,data);
     return {
       id: user,
     };
